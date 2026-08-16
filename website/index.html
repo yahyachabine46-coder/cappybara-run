@@ -47,12 +47,12 @@
         }
         #stage {
             width: 100%;
-            max-width: 800px;
+            max-width: 1100px;
         }
         #game-container {
             width: 100%;
             aspect-ratio: 800 / 250;
-            max-height: 250px;
+            max-height: 344px;
             background: linear-gradient(to bottom, #c6f7ff 75%, #b2ebf2 75%);
             border-bottom: 6px solid #3c1e07;
             position: relative;
@@ -390,6 +390,17 @@
             font-size: 11px;
             color: #9a8060;
         }
+        #credit {
+            position: fixed;
+            bottom: 10px;
+            left: 12px;
+            font-size: 12px;
+            color: #6b4a2b;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 4px 9px;
+            border-radius: 8px;
+            z-index: 20;
+        }
         @media (max-width: 480px) {
             #hint { font-size: 12px; }
         }
@@ -397,7 +408,7 @@
         /* --- COMPTE / SYNC --- */
         #auth-panel, #auth-panel-loggedin {
             width: 100%;
-            max-width: 800px;
+            max-width: 1100px;
             background: #fff;
             border: 3px solid #3c1e07;
             border-radius: 10px;
@@ -514,6 +525,7 @@
     </div>
 
     <footer>Astuce : maintiens le saut appuyé pour sauter plus haut.</footer>
+    <div id="credit">Made by Yahya &amp; Claude</div>
 
     <!--
         SYNC MULTI-APPAREILS (optionnel)
@@ -557,7 +569,7 @@
             const playBtn = document.getElementById("play-btn");
             const restartBtn = document.getElementById("restart-btn");
 
-            const GROUND_Y = 63; // px, matches the 25.2% bottom offset at 250px container height
+            let GROUND_Y = 63; // px, recalculated from actual container height (25.2% of it)
 
             let positionY = GROUND_Y;
             let velocityY = 0;
@@ -576,6 +588,7 @@
             let nextSpawnAt = 70;
             let animationFrameId = null;
             let containerWidth = 800;
+            let containerHeight = 250;
 
             const CAP_LEFT_RATIO = 0.0625; // matches left: 6.25%
             const CAP_WIDTH_RATIO = 0.09;
@@ -735,7 +748,15 @@
             }
 
             function updateContainerWidth() {
-                containerWidth = container.getBoundingClientRect().width || 800;
+                const rect = container.getBoundingClientRect();
+                containerWidth = rect.width || 800;
+                containerHeight = rect.height || 250;
+                const wasAtGround = positionY === GROUND_Y;
+                GROUND_Y = containerHeight * 0.252;
+                if (wasAtGround) {
+                    positionY = GROUND_Y;
+                    capybara.style.bottom = GROUND_Y + "px";
+                }
             }
             window.addEventListener("resize", updateContainerWidth);
             updateContainerWidth();
@@ -864,7 +885,7 @@
                 const obsTop = obsBottom + obsHeight;
 
                 const capWidth = containerWidth * CAP_WIDTH_RATIO;
-                const capHeight = 250 * CAP_HEIGHT_RATIO;
+                const capHeight = containerHeight * CAP_HEIGHT_RATIO;
                 const capLeft = containerWidth * CAP_LEFT_RATIO;
                 const capRight = capLeft + capWidth - 15;
                 const capBottom = positionY;
